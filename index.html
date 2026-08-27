@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>성남 9.19 룰렛 — 청년의 날 블라인드 챌린지</title>
+<meta name="description" content="성남시 8대 명소 룰렛이 9.19초에 한 바퀴. 5~7초 뒤 화면이 가려지면 오직 감각으로 9.19초에 멈추세요. 청년의 날 히든 미션 5종 포함.">
+<meta name="theme-color" content="#F6AB00">
+<meta name="format-detection" content="telephone=no">
+
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/components.css">
+<link rel="stylesheet" href="./css/game-shell.css">
+<link rel="stylesheet" href="./css/game.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">본문 바로가기</a>
+
+<!-- 헤더 (SNM.ui.mountHeader 가 이 자리를 치환) -->
+<div id="appHeader"></div>
+
+<main id="main" class="game-shell" tabindex="-1">
+  <div class="game-shell__body">
+
+    <h1 class="game-title">🎡 성남 9.19 룰렛 <small>청년의 날 · 블라인드 타이밍</small></h1>
+
+    <div class="hud">
+      <div class="hud__item">
+        <span class="hud__label">차례</span>
+        <span class="hud__value num" id="hudTurn">–</span>
+      </div>
+      <div class="hud__item hud__item--wide">
+        <span class="hud__label">참가자</span>
+        <span class="hud__value hud__value--name" id="hudName">대기 중</span>
+      </div>
+      <div class="hud__item">
+        <span class="hud__label">목표</span>
+        <span class="hud__value num">9.19</span>
+      </div>
+    </div>
+
+    <div class="game-stage" id="stage">
+
+      <!-- 룰렛 -->
+      <div class="wheel-wrap" id="wheelWrap">
+        <div class="wheel-pointer" aria-hidden="true">
+          <svg viewBox="0 0 40 34" width="40" height="34" focusable="false">
+            <path d="M20 32 L3 4 Q20 12 37 4 Z" style="fill:var(--sn-gold);stroke:var(--sn-gold-dark)" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="wheel-goal" aria-hidden="true">9.19</div>
+        <div class="wheel-rotor" id="wheelRotor"></div>
+
+        <div class="wheel-plate" id="plate">
+          <div class="wheel-plate__mascot" id="plateMascot" aria-hidden="true"></div>
+          <div class="wheel-plate__big num" id="bigTime">00.00</div>
+          <div class="wheel-plate__sub" id="segLabel">대기 중</div>
+        </div>
+      </div>
+
+      <!-- 블라인드 커튼 (5~7초 이후 화면 전체를 가린다) -->
+      <div class="curtain" id="curtain" aria-hidden="true">
+        <div class="curtain__panel curtain__panel--top"></div>
+        <div class="curtain__panel curtain__panel--bottom"></div>
+        <div class="curtain__center">
+          <div class="curtain__mascot" id="curtainMascot"></div>
+          <p class="curtain__title">화면이 가려졌습니다</p>
+          <p class="curtain__desc">이제부터는 <b>감각</b>으로!<br>9.19초라고 느껴지는 순간 <b>정지</b></p>
+        </div>
+      </div>
+
+      <p class="sr-only" id="live" aria-live="polite"></p>
+
+      <!-- 참가자 설정 오버레이 -->
+      <div class="start-overlay setup" id="setupOverlay">
+        <div class="setup__mascot" id="setupMascot"></div>
+        <h2>청년의 날 9.19초 챌린지</h2>
+        <p class="setup__lead">
+          룰렛은 <b>9.19초에 정확히 한 바퀴</b> 돕니다.<br>
+          처음엔 화면을 보며 페이스를 잡고, <b id="setupBlindText">5~7초</b>가 지나면 화면이 가려집니다.
+        </p>
+
+        <ul class="setup__list" id="nameList"></ul>
+
+        <div class="setup__row">
+          <button class="btn btn--ghost btn--sm" id="addPlayerBtn" type="button">+ 참가자 추가</button>
+          <button class="btn btn--ghost btn--sm" id="blindModeBtn" type="button" aria-pressed="true">
+            가림 시점: <b id="blindModeLabel">5~7초 랜덤</b>
+          </button>
+        </div>
+
+        <button class="btn btn--primary btn--lg" id="startBtn" type="button">게임 시작</button>
+      </div>
+
+      <!-- 차례 안내 오버레이 -->
+      <div class="start-overlay ready" id="readyOverlay" hidden>
+        <div class="ready__mascot" id="readyMascot"></div>
+        <p class="ready__turn" id="readyTurn">1번째 차례</p>
+        <h2 class="ready__name" id="readyName">참가자 1</h2>
+        <p class="ready__desc">
+          시작하면 <b>3 · 2 · 1</b> 카운트다운 후 룰렛이 돕니다.<br>
+          기회는 <b>단 한 번</b>, 9.19초에 멈추세요!
+        </p>
+        <button class="btn btn--primary btn--lg" id="readyBtn" type="button">준비 완료 · 시작</button>
+      </div>
+
+    </div>
+
+    <div class="game-controls">
+      <button class="btn btn--primary btn--lg btn--block" id="stopBtn" type="button" disabled>정 지</button>
+    </div>
+
+    <p class="game-hint" id="hint">참가자 이름을 확인하고 <b>[게임 시작]</b>을 누르세요.</p>
+
+    <!-- 진행 현황판 -->
+    <section class="board" id="board" aria-labelledby="boardTitle">
+      <header class="board__head">
+        <h2 id="boardTitle" class="board__title">진행 현황</h2>
+        <button class="btn btn--ghost btn--sm" id="resetBtn" type="button" hidden>처음부터</button>
+      </header>
+      <ul class="board__list" id="boardList"></ul>
+    </section>
+
+    <!-- 히든 미션 보드 (적중 시 · 최종 결과에서 공개) -->
+    <section class="missions" id="missionBoard" hidden aria-labelledby="missionTitle">
+      <header class="board__head">
+        <h2 id="missionTitle" class="board__title">🎁 히든 미션</h2>
+        <span class="chip chip--gold" id="missionCount">0 / 5 공개</span>
+      </header>
+      <ul class="missions__list" id="missionList"></ul>
+    </section>
+
+  </div>
+</main>
+
+<script src="./js/core/util.js"></script>
+<script src="./js/core/store.js"></script>
+<script src="./js/core/audio.js"></script>
+<script src="./js/core/mascot.js"></script>
+<script src="./js/core/ui.js"></script>
+<script src="./js/game.js"></script>
+</body>
+</html>

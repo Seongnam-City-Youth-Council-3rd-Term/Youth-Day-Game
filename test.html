@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>규칙 검증 · 성남 9.19 룰렛</title>
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/components.css">
+<style>
+  body{ padding:var(--sp-5) var(--sp-4) var(--sp-8); }
+  .wrap{ max-width:860px; margin-inline:auto; display:flex; flex-direction:column; gap:var(--sp-5); }
+  h1{ font-size:var(--fs-xl); }
+  h2{ font-size:var(--fs-lg); margin-bottom:var(--sp-2); }
+  .lead{ color:var(--c-text-sub); font-size:var(--fs-sm); }
+  .summary{
+    display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap;
+    padding:var(--sp-4); border-radius:var(--r-md);
+    background:var(--c-surface); border:1px solid var(--c-border); box-shadow:var(--sh-1);
+  }
+  .summary__badge{
+    padding:6px 16px; border-radius:var(--r-pill);
+    font-weight:800; font-size:var(--fs-lg);
+  }
+  .summary__badge.pass{ background:#E4F7EC; color:#0B6B33; }
+  .summary__badge.fail{ background:#FFE5EC; color:var(--sn-red-dark); }
+  table{ width:100%; border-collapse:collapse; font-size:var(--fs-sm); background:var(--c-surface); }
+  .scroll{ overflow-x:auto; border:1px solid var(--c-border); border-radius:var(--r-md); box-shadow:var(--sh-1); }
+  th,td{ padding:8px 12px; text-align:left; border-bottom:1px solid var(--c-border); white-space:nowrap; }
+  th{ background:var(--sn-gray-50); font-size:var(--fs-xs); color:var(--c-text-sub); }
+  tr:last-child td{ border-bottom:0; }
+  td.num, th.num{ font-family:var(--font-num); font-variant-numeric:tabular-nums; }
+  .ok{ color:#0B6B33; font-weight:800; }
+  .no{ color:var(--sn-red); font-weight:800; }
+  tr.is-fail td{ background:#FFF0F4; }
+  code{ font-family:var(--font-num); background:var(--sn-gray-100); padding:1px 6px; border-radius:var(--r-xs); }
+  .back{ font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🧪 규칙 검증 — 성남 9.19 룰렛</h1>
+    <p class="lead">
+      게임에 실제로 실린 판정 함수(<code>SNM.rules</code>)를 그대로 호출해 검사합니다.
+      사본이 아니므로, 여기서 통과하면 무대에서도 같은 결과가 나옵니다.
+      <br>연출까지 눈으로 확인하려면 <a class="back" href="./index.html?test">index.html?test</a> 의 리허설 패널을 쓰세요.
+    </p>
+  </header>
+
+  <div class="summary" id="summary"></div>
+
+  <section>
+    <h2>1. 미션 적중 구간</h2>
+    <p class="lead">스톱워치는 1/100초에서 <b>버림</b>하므로, 각 미션은 아래 10ms 구간에 멈추면 성공입니다.</p>
+    <div class="scroll"><table id="windows"></table></div>
+  </section>
+
+  <section>
+    <h2>2. 표시값 · 미션 판정 · 명소</h2>
+    <p class="lead">화면에 보인 값과 판정이 어긋나지 않는지 확인합니다.</p>
+    <div class="scroll"><table id="cases"></table></div>
+  </section>
+
+  <section>
+    <h2>3. 룰렛 각도 ↔ 명소 일치</h2>
+    <p class="lead">회전각으로 계산한 포인터 아래 명소가 시간으로 계산한 명소와 같은지 0~15초 전 구간(1ms 간격)에서 확인합니다.</p>
+    <div class="scroll"><table id="sweep"></table></div>
+  </section>
+
+</div>
+
+<script src="./js/core/util.js"></script>
+<script src="./js/core/store.js"></script>
+<script src="./js/core/audio.js"></script>
+<script src="./js/core/mascot.js"></script>
+<script src="./js/core/ui.js"></script>
+<script src="./js/game.js"></script>
+<script>
+(function () {
+  'use strict';
+  var R = SNM.rules;
+  var pass = 0, fail = 0;
+
+  function mark(ok) { ok ? pass++ : fail++; return ok ? '<span class="ok">통과</span>' : '<span class="no">실패</span>'; }
+  function ids(list) { return list.length ? list.join(', ') : '—'; }
+
+  /* ── 1. 미션 적중 구간 ── */
+  var wrows = '<tr><th>코드</th><th>종류</th><th>의미</th><th class="num">적중 구간</th><th>판정</th></tr>';
+  R.MISSIONS.forEach(function (m) {
+    var lo = m.cs * 10, hi = lo + 9;
+    var range = (m.kind === 'basic')
+      ? '초 끝자리 19 — …, 8.190~8.199, 9.190~9.199, 10.190~10.199, …'
+      : (lo / 1000).toFixed(3) + ' ~ ' + (hi / 1000).toFixed(3) + '초';
+    // 구간의 양 끝과 바로 바깥이 기대대로인지 확인
+    var ok = R.evalMissions(lo).indexOf(m.id) >= 0 &&
+             R.evalMissions(hi).indexOf(m.id) >= 0 &&
+             R.evalMissions(lo - 1).indexOf(m.id) < 0 &&
+             R.evalMissions(hi + 1).indexOf(m.id) < 0;
+    wrows += '<tr class="' + (ok ? '' : 'is-fail') + '"><td class="num">' + m.icon + ' ' + m.code + '</td>' +
+             '<td>' + (m.kind === 'basic' ? '기본' : '히든') + '</td>' +
+             '<td>' + m.title + '</td>' +
+             '<td class="num">' + range + '</td><td>' + mark(ok) + '</td></tr>';
+  });
+  document.getElementById('windows').innerHTML = wrows;
+
+  /* ── 2. 표시값 · 판정 · 명소 ── */
+  var CASES = [
+    [9190,  '09.19', ['m919'], '9.19 정확히'],
+    [9199,  '09.19', ['m919'], '9.19 구간 끝'],
+    [9189,  '09.18', [],       '9.19 직전 — 미적중'],
+    [9200,  '09.20', ['m920'], '히든 9.20'],
+    [9209,  '09.20', ['m920'], '히든 9.20 구간 끝'],
+    [9910,  '09.91', ['m991'], '히든 9.91'],
+    [9919,  '09.91', ['m991'], '히든 9.91 구간 끝'],
+    [9920,  '09.92', [],       '9.91 바로 다음 — 미적중'],
+    [9090,  '09.09', ['m909'], '히든 9.09'],
+    [9099,  '09.09', ['m909'], '히든 9.09 구간 끝'],
+    [7770,  '07.77', ['m777'], '히든 7.77'],
+    [7779,  '07.77', ['m777'], '히든 7.77 구간 끝'],
+    [8190,  '08.19', ['m919'], '끝자리 19 — 기본 미션'],
+    [10190, '10.19', ['m919'], '끝자리 19 — 10초대'],
+    [5190,  '05.19', ['m919'], '끝자리 19 — 5초대'],
+    [9180,  '09.18', [],       '미적중'],
+    [15000, '15.00', [],       '자동 시간 초과 값']
+  ];
+  var crows = '<tr><th class="num">정지(ms)</th><th class="num">표시</th><th>기대 미션</th><th>실제 미션</th>' +
+              '<th>멈춘 명소</th><th>설명</th><th>판정</th></tr>';
+  CASES.forEach(function (c) {
+    var got = R.evalMissions(c[0]);
+    var shown = R.fmt(c[0]);
+    var ok = (shown === c[1]) && (got.join(',') === c[2].join(','));
+    crows += '<tr class="' + (ok ? '' : 'is-fail') + '">' +
+             '<td class="num">' + c[0].toLocaleString('ko-KR') + '</td>' +
+             '<td class="num">' + shown + '</td>' +
+             '<td>' + ids(c[2]) + '</td><td>' + ids(got) + '</td>' +
+             '<td>' + R.segAt(c[0]).short + '</td>' +
+             '<td>' + c[3] + '</td><td>' + mark(ok) + '</td></tr>';
+  });
+  document.getElementById('cases').innerHTML = crows;
+
+  /* ── 3. 각도 ↔ 명소 스윕 ── */
+  // 룰렛은 9.19초에 한 바퀴. 슬롯 k(12시부터 시계방향)에는 명소 (7-k) 가 그려져 있다.
+  function segByAngle(ms) {
+    var A = (ms / R.TARGET_MS) * 360;
+    var L = (360 - (A % 360)) % 360;
+    var k = Math.floor(L / 45) % 8;
+    return R.SEGMENTS[7 - k];
+  }
+  var bad = [], skipped = 0;
+  for (var ms = 1; ms <= 15000; ms++) {
+    if (ms % R.SEG_MS === 0) { skipped++; continue; }     // 칸 경계선 위 — 판정 대상 아님
+    if (segByAngle(ms).short !== R.segAt(ms).short) bad.push(ms);
+  }
+  var sweepOK = (bad.length === 0);
+  document.getElementById('sweep').innerHTML =
+    '<tr><th>검사 구간</th><th class="num">검사 수</th><th class="num">경계 제외</th>' +
+    '<th class="num">불일치</th><th>판정</th></tr>' +
+    '<tr class="' + (sweepOK ? '' : 'is-fail') + '"><td>1ms ~ 15,000ms</td>' +
+    '<td class="num">' + (15000 - skipped).toLocaleString('ko-KR') + '</td>' +
+    '<td class="num">' + skipped + '</td>' +
+    '<td class="num">' + bad.length + (bad.length ? ' (' + bad.slice(0, 8).join(', ') + '…)' : '') + '</td>' +
+    '<td>' + mark(sweepOK) + '</td></tr>';
+
+  /* ── 요약 ── */
+  document.getElementById('summary').innerHTML =
+    '<span class="summary__badge ' + (fail ? 'fail' : 'pass') + '">' +
+      (fail ? '❌ ' + fail + '건 실패' : '✅ 전부 통과') + '</span>' +
+    '<span>통과 <b class="num">' + pass + '</b> · 실패 <b class="num">' + fail + '</b>' +
+    ' · 목표 <b class="num">' + R.fmt3(R.TARGET_MS) + '초</b>' +
+    ' · 룰렛 한 칸 <b class="num">' + (R.SEG_MS / 1000).toFixed(5) + '초</b></span>';
+})();
+</script>
+</body>
+</html>

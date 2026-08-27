@@ -1,0 +1,90 @@
+/* ============================================================
+   성남 미니게임 랜드 — 디자인 토큰
+   성남시 CI 컬러 기반. 모든 CSS 파일보다 먼저 로드할 것.
+   ============================================================ */
+:root{
+  /* ── 브랜드 (성남시 CI) ── */
+  --sn-gold:        #F6AB00;
+  --sn-gold-dark:   #C98A00;
+  --sn-gold-light:  #FFD466;
+  --sn-blue:        #005BAC;
+  --sn-blue-dark:   #00417A;
+  --sn-blue-light:  #4D96D6;
+  --sn-red:         #DF003C;
+  --sn-red-dark:    #A8002D;
+  --sn-red-light:   #FF5C82;
+  --sn-white:       #FFFFFF;
+
+  /* ── 뉴트럴 ── */
+  --sn-gray-50:  #F8F9FB;
+  --sn-gray-100: #EFF2F6;
+  --sn-gray-200: #E1E6ED;
+  --sn-gray-300: #C8D0DA;
+  --sn-gray-400: #9AA6B4;
+  --sn-gray-600: #5C6774;
+  --sn-gray-800: #2E3742;
+  --sn-gray-900: #1A2027;
+
+  /* ── 시맨틱 ── */
+  --c-bg:        var(--sn-gray-50);
+  --c-surface:   var(--sn-white);
+  --c-text:      var(--sn-gray-900);
+  --c-text-sub:  var(--sn-gray-600);
+  --c-border:    var(--sn-gray-200);
+  --c-success:   #14A44D;
+  --c-warning:   var(--sn-gold);
+  --c-danger:    var(--sn-red);
+  --c-on-gold:   #2A1C00;   /* 골드 배경 위 텍스트 (흰 글씨 금지) */
+
+  /* ── 그라디언트 ── */
+  --g-gold:  linear-gradient(135deg, #FFD466 0%, #F6AB00 55%, #E09600 100%);
+  --g-blue:  linear-gradient(135deg, #4D96D6 0%, #005BAC 100%);
+  --g-hero:  radial-gradient(120% 90% at 50% 0%, #FFF6DF 0%, #FFFFFF 60%, #F1F6FB 100%);
+  --g-sky:   linear-gradient(180deg, #BFE4FF 0%, #E8F5FF 70%, #FFF6E3 100%);
+
+  /* ── 라운드 ── */
+  --r-xs:   6px;
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  24px;
+  --r-xl:  32px;
+  --r-pill: 999px;
+
+  /* ── 그림자 (블루 틴트) ── */
+  --sh-1: 0 1px 2px rgba(0,65,122,.06), 0 2px 6px rgba(0,65,122,.06);
+  --sh-2: 0 4px 10px rgba(0,65,122,.10), 0 10px 24px rgba(0,65,122,.08);
+  --sh-3: 0 10px 24px rgba(0,65,122,.14), 0 24px 56px rgba(0,65,122,.14);
+  --sh-gold: 0 6px 18px rgba(246,171,0,.38);
+  --sh-inset: inset 0 2px 0 rgba(255,255,255,.6);
+
+  /* ── 간격 (4px 스케일) ── */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+
+  /* ── 타이포 ── */
+  --font-base: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕",
+               "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
+  --font-num:  "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas,
+               "D2Coding", monospace;
+  --fs-xs:12px; --fs-sm:14px; --fs-md:16px; --fs-lg:20px;
+  --fs-xl:26px; --fs-2xl:34px; --fs-3xl:44px;
+  --lh-tight:1.25; --lh-base:1.6;
+
+  /* ── 모션 ── */
+  --ease-out:  cubic-bezier(.2,.8,.3,1);
+  --ease-pop:  cubic-bezier(.2,.9,.3,1.3);
+  --dur-fast: 140ms; --dur-base: 240ms; --dur-slow: 420ms;
+
+  /* ── 레이어 ── */
+  --z-hud:10; --z-header:50; --z-toast:80; --z-modal:100;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}

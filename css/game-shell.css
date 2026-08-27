@@ -1,0 +1,72 @@
+/* ============================================================
+   game-shell.css — 게임 5종이 공유하는 껍데기 레이아웃
+   ============================================================ */
+.game-shell{
+  display:flex; flex-direction:column;
+  min-height:100vh; min-height:100dvh;
+}
+.game-shell__body{
+  flex:1;
+  display:flex; flex-direction:column; gap:var(--sp-3);
+  width:100%; margin-inline:auto;
+  padding:var(--sp-4) var(--sp-4) max(var(--sp-4), env(safe-area-inset-bottom));
+}
+
+/* 게임별 최대 폭은 각 style.css 에서 --stage-max 로 지정 */
+.game-shell__body{ max-width:var(--stage-max, 560px); }
+
+.game-title{
+  display:flex; align-items:center; gap:var(--sp-2);
+  font-size:var(--fs-lg); font-weight:800;
+}
+.game-title small{
+  font-size:var(--fs-xs); font-weight:600; color:var(--c-text-sub);
+}
+
+.game-stage{
+  position:relative;
+  flex:1; display:grid; place-items:center;
+  padding:var(--sp-4);
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--r-lg);
+  box-shadow:var(--sh-2);
+  overflow:hidden;
+  touch-action:manipulation;
+  user-select:none; -webkit-user-select:none;
+}
+.game-stage--flat{ background:transparent; border:0; box-shadow:none; padding:0; }
+
+.game-controls{
+  display:flex; gap:var(--sp-2); align-items:center; justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* 게임 안내 문구 */
+.game-hint{
+  text-align:center; font-size:var(--fs-sm); color:var(--c-text-sub);
+  min-height:1.6em;
+}
+
+/* 시작 오버레이 (플레이 전) */
+.start-overlay{
+  position:absolute; inset:0; z-index:calc(var(--z-hud) + 4);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:var(--sp-3); padding:var(--sp-5);
+  background:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  border-radius:inherit; text-align:center;
+}
+.start-overlay__mascot{ width:120px; }
+.start-overlay h2{ font-size:var(--fs-xl); }
+.start-overlay p{ font-size:var(--fs-sm); color:var(--c-text-sub); max-width:34ch; }
+.start-overlay[hidden]{ display:none; }
+
+/* 가로모드 저높이 대응 */
+@media (max-height:480px) and (orientation:landscape){
+  .app-header__inner{ min-height:48px; }
+  .game-shell__body{ padding-block:var(--sp-2); gap:var(--sp-2); }
+  .game-title{ font-size:var(--fs-md); }
+  .hud{ padding:var(--sp-2) var(--sp-3); }
+  .start-overlay__mascot{ width:76px; }
+}

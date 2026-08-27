@@ -1,0 +1,67 @@
+/* ============================================================
+   base.css — 리셋 + 타이포 + 유틸리티
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+  margin:0;
+  font-family:var(--font-base);
+  font-size:var(--fs-md);
+  line-height:var(--lh-base);
+  color:var(--c-text);
+  background:var(--c-bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+
+h1,h2,h3,h4,p,figure,ul,ol{ margin:0; }
+ul,ol{ padding:0; list-style:none; }
+img,svg{ display:block; max-width:100%; }
+button,input,select,textarea{ font:inherit; color:inherit; }
+button{ background:none; border:0; padding:0; cursor:pointer; }
+a{ color:var(--sn-blue); text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+h1{ font-size:var(--fs-2xl); line-height:var(--lh-tight); font-weight:800; letter-spacing:-.02em; }
+h2{ font-size:var(--fs-xl); line-height:var(--lh-tight); font-weight:800; letter-spacing:-.01em; }
+h3{ font-size:var(--fs-lg); line-height:var(--lh-tight); font-weight:700; }
+
+:focus-visible{ outline:3px solid var(--sn-blue); outline-offset:2px; border-radius:var(--r-xs); }
+
+/* ── 컨테이너 ── */
+.container{ width:100%; max-width:1080px; margin-inline:auto; padding-inline:var(--sp-4); }
+@media (min-width:1024px){ .container{ padding-inline:var(--sp-5); } }
+@media (min-width:1280px){ .container{ max-width:1160px; } }
+
+/* ── 유틸리티 ── */
+.num{ font-family:var(--font-num); font-variant-numeric:tabular-nums; }
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+.skip-link{
+  position:absolute; left:var(--sp-4); top:-100px; z-index:calc(var(--z-modal) + 10);
+  background:var(--sn-blue); color:#fff; padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--r-sm); font-weight:700; transition:top var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus{ top:var(--sp-4); text-decoration:none; }
+
+.no-select{ user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.touch{ touch-action:manipulation; }
+
+/* ── 성나미 아이들 애니메이션 ── */
+@keyframes nami-idle{
+  from{ transform:translateY(0) rotate(-1deg); }
+  to  { transform:translateY(-10px) rotate(1deg); }
+}
+.nami-idle{
+  animation:nami-idle 3s var(--ease-out) infinite alternate;
+  transform-origin:50% 80%;
+}
+@keyframes nami-pop{
+  0%{ transform:scale(1); } 40%{ transform:scale(1.14); } 100%{ transform:scale(1); }
+}
+.nami-pop{ animation:nami-pop var(--dur-slow) var(--ease-pop); }
