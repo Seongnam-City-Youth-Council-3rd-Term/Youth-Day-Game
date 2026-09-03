@@ -15,12 +15,66 @@
 /* 게임별 최대 폭은 각 style.css 에서 --stage-max 로 지정 */
 .game-shell__body{ max-width:var(--stage-max, 560px); }
 
+/* ─── 제목 + HUD 통합 바 ───
+   전체폭 카드가 제목 바 / HUD 바 / 스테이지로 세 겹 쌓이면 무거워 보인다.
+   앞의 둘을 한 장의 카드로 합치고, 좁은 화면에서는 두 줄로 접힌다. */
+.game-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:var(--sp-3);
+  width:100%;
+  padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--r-lg);
+  background:linear-gradient(135deg,#FFFFFF,#FFF6DF);
+  border:3px solid #fff;
+  box-shadow:0 6px 0 #F6E7C4, 0 14px 26px rgba(120,105,170,.10);
+}
+
 .game-title{
-  display:flex; align-items:center; gap:var(--sp-2);
-  font-size:var(--fs-lg); font-weight:800;
+  display:flex; align-items:center; gap:var(--sp-3);
+  min-width:0;
+  font-size:clamp(19px,2.2vw,28px); font-weight:800;
+  color:var(--sn-blue-dark);
+}
+/* 통합 바 안에서는 제목이 자기 배경을 갖지 않는다 (바가 곧 배경) */
+.game-bar .game-title{ flex:1 1 260px; }
+
+/* 제목 앞 이모지를 동글한 배지로 */
+.game-title__icon,
+.game-title > [aria-hidden]{
+  flex:none;
+  display:grid; place-items:center;
+  width:1.5em; height:1.5em; border-radius:50%;
+  background:var(--g-gold); border:2px solid #fff;
+  box-shadow:0 3px 0 #E9AE2E;
+  font-size:.8em;
+  animation:cute-wiggle 2.6s var(--ease-out) infinite;
+}
+/* 게임명 위, 행사·주최 부제 아래 — 부제가 길어도 제목을 밀지 않는다 */
+.game-title__text{
+  display:flex; flex-direction:column; align-items:flex-start; gap:5px;
+  min-width:0; line-height:1.2;
 }
 .game-title small{
-  font-size:var(--fs-xs); font-weight:600; color:var(--c-text-sub);
+  display:block; max-width:100%;
+  font-size:var(--fs-xs); font-weight:800;
+  padding:4px 12px; border-radius:var(--r-pill);
+  background:var(--candy-sky-soft); color:#0F5D91;
+  border:2px solid #fff;
+  word-break:keep-all;
+}
+
+/* 통합 바 안의 HUD 는 카드가 아니라 캡슐 두 개로만 존재한다 */
+.game-bar .hud{
+  flex:0 0 auto;
+  width:auto; padding:0;
+  background:none; border:0; box-shadow:none; border-radius:0;
+}
+.game-bar .hud__item{ min-width:88px; }
+.game-bar .hud__item--wide{ flex:0 0 auto; }
+@media (max-width:559px){
+  .game-bar{ justify-content:center; }
+  .game-bar .hud{ flex:1 1 100%; }
+  .game-bar .hud__item{ flex:1 1 0; }
 }
 
 .game-stage{
@@ -28,8 +82,8 @@
   flex:1; display:grid; place-items:center;
   padding:var(--sp-4);
   background:var(--c-surface);
-  border:1px solid var(--c-border);
-  border-radius:var(--r-lg);
+  border:3px solid #fff;
+  border-radius:var(--r-xl);
   box-shadow:var(--sh-2);
   overflow:hidden;
   touch-action:manipulation;
@@ -44,22 +98,35 @@
 
 /* 게임 안내 문구 */
 .game-hint{
-  text-align:center; font-size:var(--fs-sm); color:var(--c-text-sub);
+  text-align:center; font-size:var(--fs-sm); font-weight:700; color:var(--c-text-sub);
   min-height:1.6em;
+  padding:var(--sp-2) var(--sp-3);
+  border-radius:var(--r-pill);
+  background:rgba(255,255,255,.72);
+  border:2px dashed var(--candy-sky);
 }
+.game-hint b{ color:var(--sn-blue); }
 
 /* 시작 오버레이 (플레이 전) */
 .start-overlay{
   position:absolute; inset:0; z-index:calc(var(--z-hud) + 4);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:var(--sp-3); padding:var(--sp-5);
-  background:rgba(255,255,255,.94);
-  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  background:
+    radial-gradient(circle at 12% 16%,var(--candy-butter-soft) 0 12px,transparent 13px),
+    radial-gradient(circle at 88% 22%,var(--candy-sky-soft) 0 16px,transparent 17px),
+    radial-gradient(circle at 82% 84%,var(--candy-berry-soft) 0 13px,transparent 14px),
+    radial-gradient(circle at 16% 80%,var(--candy-mint-soft) 0 14px,transparent 15px),
+    linear-gradient(165deg,rgba(255,255,255,.97),rgba(255,250,242,.97));
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
   border-radius:inherit; text-align:center;
 }
 .start-overlay__mascot{ width:120px; }
-.start-overlay h2{ font-size:var(--fs-xl); }
-.start-overlay p{ font-size:var(--fs-sm); color:var(--c-text-sub); max-width:34ch; }
+.start-overlay h2{
+  font-size:clamp(24px,3.1vw,38px); color:var(--sn-blue-dark);
+  word-break:keep-all; line-height:1.3;
+}
+.start-overlay p{ font-size:clamp(15px,1.7vw,19px); color:var(--c-text-sub); max-width:38ch; }
 .start-overlay[hidden]{ display:none; }
 
 /* 가로모드 저높이 대응 */
@@ -67,6 +134,7 @@
   .app-header__inner{ min-height:48px; }
   .game-shell__body{ padding-block:var(--sp-2); gap:var(--sp-2); }
   .game-title{ font-size:var(--fs-md); }
-  .hud{ padding:var(--sp-2) var(--sp-3); }
+  .game-bar{ padding:var(--sp-2) var(--sp-3); }
+  .hud{ padding:var(--sp-2); }
   .start-overlay__mascot{ width:76px; }
 }

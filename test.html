@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>규칙 검증 · 성남 9.19 룰렛</title>
+<title>규칙 검증 · 청년의 날 9.19 타이밍 챌린지</title>
 <link rel="stylesheet" href="./css/tokens.css">
 <link rel="stylesheet" href="./css/base.css">
 <link rel="stylesheet" href="./css/components.css">
@@ -41,7 +41,7 @@
 <div class="wrap">
 
   <header>
-    <h1>🧪 규칙 검증 — 성남 9.19 룰렛</h1>
+    <h1>🧪 규칙 검증 — 청년의 날 9.19 타이밍 챌린지</h1>
     <p class="lead">
       게임에 실제로 실린 판정 함수(<code>SNM.rules</code>)를 그대로 호출해 검사합니다.
       사본이 아니므로, 여기서 통과하면 무대에서도 같은 결과가 나옵니다.
@@ -58,14 +58,14 @@
   </section>
 
   <section>
-    <h2>2. 표시값 · 미션 판정 · 명소</h2>
+    <h2>2. 표시값 · 미션 판정 · 내부 시간 구간</h2>
     <p class="lead">화면에 보인 값과 판정이 어긋나지 않는지 확인합니다.</p>
     <div class="scroll"><table id="cases"></table></div>
   </section>
 
   <section>
-    <h2>3. 룰렛 각도 ↔ 명소 일치</h2>
-    <p class="lead">회전각으로 계산한 포인터 아래 명소가 시간으로 계산한 명소와 같은지 0~15초 전 구간(1ms 간격)에서 확인합니다.</p>
+    <h2>3. 시간 구간 내부 매핑 일치</h2>
+    <p class="lead">레거시 호환용 내부 구간 계산이 0~15초 전 구간(1ms 간격)에서 일치하는지 확인합니다.</p>
     <div class="scroll"><table id="sweep"></table></div>
   </section>
 
@@ -126,7 +126,7 @@
     [15000, '15.00', [],       '자동 시간 초과 값']
   ];
   var crows = '<tr><th class="num">정지(ms)</th><th class="num">표시</th><th>기대 미션</th><th>실제 미션</th>' +
-              '<th>멈춘 명소</th><th>설명</th><th>판정</th></tr>';
+              '<th>내부 구간</th><th>설명</th><th>판정</th></tr>';
   CASES.forEach(function (c) {
     var got = R.evalMissions(c[0]);
     var shown = R.fmt(c[0]);
@@ -141,7 +141,7 @@
   document.getElementById('cases').innerHTML = crows;
 
   /* ── 3. 각도 ↔ 명소 스윕 ── */
-  // 룰렛은 9.19초에 한 바퀴. 슬롯 k(12시부터 시계방향)에는 명소 (7-k) 가 그려져 있다.
+  // 레거시 호환용 각도 구간과 시간 구간이 동일한지 확인한다.
   function segByAngle(ms) {
     var A = (ms / R.TARGET_MS) * 360;
     var L = (360 - (A % 360)) % 360;
@@ -169,7 +169,7 @@
       (fail ? '❌ ' + fail + '건 실패' : '✅ 전부 통과') + '</span>' +
     '<span>통과 <b class="num">' + pass + '</b> · 실패 <b class="num">' + fail + '</b>' +
     ' · 목표 <b class="num">' + R.fmt3(R.TARGET_MS) + '초</b>' +
-    ' · 룰렛 한 칸 <b class="num">' + (R.SEG_MS / 1000).toFixed(5) + '초</b></span>';
+    ' · 내부 구간 <b class="num">' + (R.SEG_MS / 1000).toFixed(5) + '초</b></span>';
 })();
 </script>
 </body>

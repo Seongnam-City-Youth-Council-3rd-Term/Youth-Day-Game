@@ -1,8 +1,12 @@
 /* ============================================================
    성남 미니게임 랜드 — 디자인 토큰
-   성남시 CI 컬러 기반. 모든 CSS 파일보다 먼저 로드할 것.
+   성남시 CI 컬러 기반 + 파스텔 캔디 레이어(아기자기 톤).
+   모든 CSS 파일보다 먼저 로드할 것.
    ============================================================ */
 :root{
+  /* 현재 노출 화면의 성남시 CI 기반 이벤트 팔레트. */
+  --event-navy:#00417A; --event-violet:#005BAC; --event-mint:#4D96D6;
+  --event-coral:#DF003C; --event-yellow:#F6AB00; --event-bg:#F1F6FB;
   /* ── 브랜드 (성남시 CI) ── */
   --sn-gold:        #F6AB00;
   --sn-gold-dark:   #C98A00;
@@ -15,47 +19,72 @@
   --sn-red-light:   #FF5C82;
   --sn-white:       #FFFFFF;
 
-  /* ── 뉴트럴 ── */
-  --sn-gray-50:  #F8F9FB;
-  --sn-gray-100: #EFF2F6;
-  --sn-gray-200: #E1E6ED;
-  --sn-gray-300: #C8D0DA;
-  --sn-gray-400: #9AA6B4;
-  --sn-gray-600: #5C6774;
-  --sn-gray-800: #2E3742;
-  --sn-gray-900: #1A2027;
+  /* ── 파스텔 캔디 (아기자기 톤) ──
+     브랜드 색을 한 톤 밝게 풀어 쓴 보조 팔레트. 큰 면적·장식에 사용. */
+  --candy-sky:        #8FCBF2;   /* 성남 블루의 파스텔 */
+  --candy-sky-soft:   #DCF0FF;
+  --candy-butter:     #FFC94B;   /* 성남 골드의 파스텔 */
+  --candy-butter-soft:#FFF0C4;
+  --candy-berry:      #FF97B0;   /* 성남 레드의 파스텔 */
+  --candy-berry-soft: #FFE1E8;
+  --candy-mint:       #7FDCC2;
+  --candy-mint-soft:  #DDF7EF;
+  --candy-lilac:      #B6A8F0;
+  --candy-lilac-soft: #ECE7FF;
+  --candy-peach:      #FFB392;
+  --candy-cream:      #FFFCF4;
+
+  /* ── 뉴트럴 (살짝 따뜻하게) ── */
+  --sn-gray-50:  #FAF9F6;
+  --sn-gray-100: #F2F1EC;
+  --sn-gray-200: #E6E4DD;
+  --sn-gray-300: #CFCCC2;
+  --sn-gray-400: #9E9C93;
+  --sn-gray-600: #6A6A63;
+  --sn-gray-800: #3A3A36;
+  --sn-gray-900: #26262A;
 
   /* ── 시맨틱 ── */
-  --c-bg:        var(--sn-gray-50);
+  --c-bg:        var(--candy-cream);
   --c-surface:   var(--sn-white);
-  --c-text:      var(--sn-gray-900);
-  --c-text-sub:  var(--sn-gray-600);
-  --c-border:    var(--sn-gray-200);
-  --c-success:   #14A44D;
+  --c-text:      #3C3550;          /* 순검정 대신 부드러운 자주빛 먹색 */
+  --c-text-sub:  #7C7490;
+  --c-border:    #ECE6F5;
+  --c-success:   #2FBF7E;
   --c-warning:   var(--sn-gold);
   --c-danger:    var(--sn-red);
-  --c-on-gold:   #2A1C00;   /* 골드 배경 위 텍스트 (흰 글씨 금지) */
+  --c-on-gold:   #6A4200;   /* 골드 배경 위 텍스트 (흰 글씨 금지) */
 
   /* ── 그라디언트 ── */
-  --g-gold:  linear-gradient(135deg, #FFD466 0%, #F6AB00 55%, #E09600 100%);
-  --g-blue:  linear-gradient(135deg, #4D96D6 0%, #005BAC 100%);
-  --g-hero:  radial-gradient(120% 90% at 50% 0%, #FFF6DF 0%, #FFFFFF 60%, #F1F6FB 100%);
-  --g-sky:   linear-gradient(180deg, #BFE4FF 0%, #E8F5FF 70%, #FFF6E3 100%);
+  --g-gold:  linear-gradient(135deg, #FFE6A3 0%, #FFC94B 55%, #F6AB00 100%);
+  --g-blue:  linear-gradient(135deg, #4FA6E3 0%, #1D82C9 52%, #005BAC 100%);
+  --g-berry: linear-gradient(135deg, #FFC0D0 0%, #FF97B0 100%);
+  --g-mint:  linear-gradient(135deg, #BFF0E2 0%, #7FDCC2 100%);
+  --g-hero:  radial-gradient(120% 90% at 50% 0%, #FFF6DF 0%, #FFFFFF 60%, #EAF6FF 100%);
+  --g-sky:   linear-gradient(180deg, #CDEBFF 0%, #EAF6FF 62%, #FFF7E8 100%);
+  /* 파스텔 무지개 — 리본·구분선용 */
+  --g-rainbow: linear-gradient(90deg,#FF97B0,#FFC94B,#7FDCC2,#8FCBF2,#B6A8F0);
 
-  /* ── 라운드 ── */
-  --r-xs:   6px;
-  --r-sm:  10px;
-  --r-md:  16px;
-  --r-lg:  24px;
-  --r-xl:  32px;
+  /* ── 라운드 (전반적으로 더 동글동글하게) ── */
+  --r-xs:  10px;
+  --r-sm:  16px;
+  --r-md:  22px;
+  --r-lg:  30px;
+  --r-xl:  40px;
   --r-pill: 999px;
 
-  /* ── 그림자 (블루 틴트) ── */
-  --sh-1: 0 1px 2px rgba(0,65,122,.06), 0 2px 6px rgba(0,65,122,.06);
-  --sh-2: 0 4px 10px rgba(0,65,122,.10), 0 10px 24px rgba(0,65,122,.08);
-  --sh-3: 0 10px 24px rgba(0,65,122,.14), 0 24px 56px rgba(0,65,122,.14);
-  --sh-gold: 0 6px 18px rgba(246,171,0,.38);
-  --sh-inset: inset 0 2px 0 rgba(255,255,255,.6);
+  /* ── 그림자 ──
+     sh-1~3 : 부드러운 라벤더 틴트 (칙칙한 회색 그림자 대신)
+     sh-jelly-* : 아래로 떨어지는 단색 굽 — 젤리 버튼/카드용 */
+  --sh-1: 0 2px 4px rgba(120,105,170,.06), 0 6px 14px rgba(120,105,170,.07);
+  --sh-2: 0 4px 10px rgba(120,105,170,.10), 0 12px 28px rgba(120,105,170,.10);
+  --sh-3: 0 12px 28px rgba(120,105,170,.16), 0 28px 64px rgba(120,105,170,.16);
+  --sh-gold: 0 6px 18px rgba(246,171,0,.34);
+  --sh-inset: inset 0 2px 0 rgba(255,255,255,.7);
+  --sh-jelly-blue:  0 6px 0 #6FB4E2, 0 12px 22px rgba(87,173,230,.28);
+  --sh-jelly-gold:  0 6px 0 #E9AE2E, 0 12px 22px rgba(246,171,0,.26);
+  --sh-jelly-berry: 0 6px 0 #F07E99, 0 12px 22px rgba(255,151,176,.28);
+  --sh-jelly-soft:  0 5px 0 #ECE6F5, 0 12px 22px rgba(120,105,170,.10);
 
   /* ── 간격 (4px 스케일) ── */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;

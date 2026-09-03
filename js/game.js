@@ -1,6 +1,6 @@
 /* ============================================================
-   🎡 성남 9.19 룰렛 — 청년의 날 블라인드 타이밍
-   - 성남 8대 명소 룰렛이 정확히 9.19초에 한 바퀴 돈다.
+   ⏱ 청년의 날 9.19 타이밍 챌린지 — 성남시 청년정책협의체
+   - 큰 시간 숫자와 절제된 배경 이펙트로 시간의 흐름을 표현한다.
    - 5~7초(설정) 가 지나면 커튼이 화면 전체를 가린다.
    - [정지] 를 누르면 커튼이 열리며 기록이 공개된다.
    - 히든 미션(9.19 / 9.91 / 9.09 / 9.20 / 7.77) 은 적중 순간에만 공개.
@@ -18,7 +18,7 @@
   /* ───────────────────────── 상수 ───────────────────────── */
 
   var TARGET_MS   = 9190;               // 목표 9.19초 (고정 · 변경 금지)
-  var LAP_MS      = TARGET_MS;          // 룰렛 1바퀴 = 9.19초
+  var LAP_MS      = TARGET_MS;          // 빛의 궤도 1주기 = 9.19초
   var SEG_N       = 8;
   var SEG_DEG     = 360 / SEG_N;        // 45도
   var SEG_MS      = LAP_MS / SEG_N;     // 1148.75ms
@@ -30,25 +30,16 @@
   var LOCK_MS     = 220;                // 정지 직후 입력 무시 구간
   var MIN_PLAYERS = 1, MAX_PLAYERS = 6;
 
-  /* 성남 8대 명소 — 룰렛 순서(= 시간 순서) 고정.
-     i번 명소는 i*1.14875초 지점부터 포인터를 지나간다. */
+  /* 시간 구간별 무드 8종 — 기존 구간 판정 순서 고정. */
   var SEGMENTS = [
-    { name: '판교테크노밸리',       short: '판교',     fill: 'var(--sn-gold)',  ink: 'var(--c-on-gold)',
-      desc: '대한민국 IT의 심장, 판교테크노밸리 구간에서 멈췄습니다.' },
-    { name: '분당 정자동 카페거리', short: '정자동',   fill: 'var(--sn-blue)',  ink: 'var(--sn-white)',
-      desc: '커피 향 가득한 정자동 카페거리 구간입니다.' },
-    { name: '탄천 산책로',          short: '탄천',     fill: 'var(--sn-white)', ink: 'var(--c-text)',
-      desc: '도심을 가로지르는 초록 물길, 탄천 구간입니다.' },
-    { name: '남한산성',             short: '남한산성', fill: 'var(--sn-red)',   ink: 'var(--sn-white)',
-      desc: '세계유산 남한산성 성곽길 구간입니다.' },
-    { name: '모란민속5일장',        short: '모란장',   fill: 'var(--sn-gold)',  ink: 'var(--c-on-gold)',
-      desc: '정이 넘치는 모란민속5일장 구간입니다.' },
-    { name: '신구대식물원',         short: '식물원',   fill: 'var(--sn-blue)',  ink: 'var(--sn-white)',
-      desc: '사계절 꽃이 피는 신구대학교식물원 구간입니다.' },
-    { name: '성남아트센터',         short: '아트센터', fill: 'var(--sn-red)',   ink: 'var(--sn-white)',
-      desc: '문화가 흐르는 성남아트센터 구간입니다.' },
-    { name: '위례신도시',           short: '위례',     fill: 'var(--sn-white)', ink: 'var(--c-text)',
-      desc: '새롭게 피어나는 위례신도시 구간입니다.' }
+    { name:'행운', short:'행운', fill:'#FFC857', ink:'#FFC857', desc:'행운의 무드에서 멈췄습니다.' },
+    { name:'도전', short:'도전', fill:'#8B7CFF', ink:'#8B7CFF', desc:'도전의 무드에서 멈췄습니다.' },
+    { name:'열정', short:'열정', fill:'#FF6B8A', ink:'#FF6B8A', desc:'열정의 무드에서 멈췄습니다.' },
+    { name:'성장', short:'성장', fill:'#38D9B7', ink:'#38D9B7', desc:'성장의 무드에서 멈췄습니다.' },
+    { name:'기회', short:'기회', fill:'#5CC8FF', ink:'#5CC8FF', desc:'기회의 무드에서 멈췄습니다.' },
+    { name:'응원', short:'응원', fill:'#A78BFA', ink:'#A78BFA', desc:'응원의 무드에서 멈췄습니다.' },
+    { name:'반짝', short:'반짝', fill:'#FF8E72', ink:'#FF8E72', desc:'반짝이는 무드에서 멈췄습니다.' },
+    { name:'축하', short:'축하', fill:'#52E5A5', ink:'#52E5A5', desc:'축하의 무드에서 멈췄습니다.' }
   ];
 
   /* 명소 아이콘 8종 — 로컬 좌표계 0..24, stroke=currentColor */
@@ -107,7 +98,7 @@
   /* ───────────────────────── DOM ───────────────────────── */
 
   var elStage, elRotor, elPlate, elBig, elSegLabel, elPlateMascot;
-  var elCurtain, elHudTurn, elHudName, elHint, elLive;
+  var elCurtain, elHudTurn, elHint, elLive;
   var elSetup, elReady, elReadyTurn, elReadyName;
   var elNameList, elAddBtn, elBlindBtn, elBlindLabel, elStartBtn, elReadyBtn, elStopBtn;
   var elBoardList, elResetBtn;
@@ -158,14 +149,14 @@
     return out;
   }
 
-  /** 정지 시각이 속한 명소 (룰렛은 9.19초에 한 바퀴) */
+  /** 레거시 호환용 정지 시각 구간 */
   function segAt(ms) {
     var i = Math.floor(ms / SEG_MS) % SEG_N;
     if (i < 0) i += SEG_N;
     return SEGMENTS[i];
   }
 
-  /* ───────────────────── 룰렛 SVG 생성 ───────────────────── */
+  /* ───────────────────── 스톱워치 배경 SVG 생성 ───────────────────── */
 
   function polar(cx, cy, r, deg) {
     var a = (deg - 90) * Math.PI / 180;
@@ -173,55 +164,22 @@
   }
 
   /**
-   * 슬롯 k(12시부터 시계방향 k번째 45도)에는 SEGMENTS[7-k] 를 그린다.
-   * 이렇게 해야 로터를 시계방향으로 회전(A = 360·t/9.19s)시켰을 때
-   * 포인터 아래 명소가 floor(t / 1.14875s) 번째 명소와 정확히 일치한다.
+   * 궤도 k(12시부터 시계방향 k번째 45도)에는 SEGMENTS[7-k]를 둔다.
+   * 빛의 궤도를 시계방향으로 움직였을 때 시간 기반 무드와 일치한다.
    */
   function buildWheelSVG() {
-    var cx = 160, cy = 160, r = 158;
     var out = '<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
-
-    out += '<circle cx="160" cy="160" r="159" style="fill:var(--sn-gray-100)"/>';
-
-    for (var k = 0; k < SEG_N; k++) {
-      var idx = (SEG_N - 1) - k;                   // 슬롯 k ↔ 명소 7-k
-      var s   = SEGMENTS[idx];
-      var a0  = k * SEG_DEG;
-      var a1  = (k + 1) * SEG_DEG;
-      var p0  = polar(cx, cy, r, a0);
-      var p1  = polar(cx, cy, r, a1);
-      var mid = a0 + SEG_DEG / 2;
-
-      out += '<path d="M' + cx + ' ' + cy +
-             ' L' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) +
-             ' A' + r + ' ' + r + ' 0 0 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) + ' Z"' +
-             ' style="fill:' + s.fill + ';stroke:var(--c-border)" stroke-width="2"/>';
-
-      // 아이콘
-      out += '<g transform="rotate(' + mid + ' ' + cx + ' ' + cy + ') translate(148 30)"' +
-             ' style="color:' + s.ink + '" fill="none" stroke="currentColor" stroke-width="1.7"' +
-             ' stroke-linecap="round" stroke-linejoin="round" opacity="0.92">' +
-             ICONS[idx] + '</g>';
-
-      // 바깥 테두리 쪽 눈금 숫자 = 이 명소가 포인터를 지나기 시작하는 시각,
-      // 안쪽에 명소 이름. (중앙 판독판이 반지름 83 안쪽을 덮으므로 그보다 바깥에 둔다)
-      out += '<g transform="rotate(' + mid + ' ' + cx + ' ' + cy + ')">' +
-               '<text x="160" y="22" text-anchor="middle" style="fill:' + s.ink + '"' +
-               ' font-size="13" font-weight="800" font-family="sans-serif" opacity="0.75">' +
-               (idx * SEG_MS / 1000).toFixed(1) + 's</text>' +
-               '<text x="160" y="74" text-anchor="middle" style="fill:' + s.ink + '"' +
-               ' font-size="15" font-weight="800" font-family="sans-serif">' + s.short + '</text>' +
-             '</g>';
+    out += '<defs><radialGradient id="softGlow"><stop stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#8FCBF2" stop-opacity="0"/></radialGradient></defs>';
+    out += '<circle cx="160" cy="160" r="150" fill="url(#softGlow)" opacity=".3"/>';
+    /* 파스텔 이중 링 — 안쪽은 점선, 바깥쪽은 동글동글한 캔디 점 */
+    out += '<circle cx="160" cy="160" r="116" fill="none" stroke="#B6A8F0" stroke-width="3" opacity=".38" stroke-dasharray="1 14" stroke-linecap="round"/>';
+    out += '<circle cx="160" cy="160" r="137" fill="none" stroke="#FFC94B" stroke-width="5" opacity=".45" stroke-dasharray="1 20" stroke-linecap="round"/>';
+    /* 12시·3시·6시·9시 자리에 파스텔 하트 도트 */
+    var dots = ['#FF97B0', '#7FDCC2', '#FFC94B', '#8FCBF2'];
+    for (var d = 0; d < 4; d++) {
+      var pt = polar(160, 160, 148, d * 90);
+      out += '<circle cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="7" fill="' + dots[d] + '" opacity=".75"/>';
     }
-
-    // 칸 경계 장식 + 링
-    for (var b = 0; b < SEG_N; b++) {
-      var pb = polar(cx, cy, r - 4, b * SEG_DEG);
-      out += '<circle cx="' + pb[0].toFixed(2) + '" cy="' + pb[1].toFixed(2) + '" r="4.5"' +
-             ' style="fill:var(--sn-gold-light);stroke:var(--sn-gold-dark)" stroke-width="1.5"/>';
-    }
-    out += '<circle cx="160" cy="160" r="158" style="fill:none;stroke:var(--sn-gold)" stroke-width="4"/>';
-    out += '<circle cx="160" cy="160" r="86" style="fill:none;stroke:var(--sn-gold-light)" stroke-width="2" opacity=".7"/>';
     out += '</svg>';
     return out;
   }
@@ -229,7 +187,8 @@
   /* ───────────────────────── 렌더 ───────────────────────── */
 
   function setAngle(deg) {
-    elRotor.style.transform = 'rotate(' + deg.toFixed(2) + 'deg)';
+    /* 시간 진행값은 보존하지만 화면 요소를 회전시키지는 않는다. */
+    elRotor.style.setProperty('--time-progress', deg.toFixed(2));
   }
   function angleOf(ms) { return (ms / LAP_MS) * 360; }
 
@@ -246,18 +205,7 @@
   }
 
   function renderHUD() {
-    if (phase === 'SETUP') {
-      elHudTurn.textContent = '–';
-      elHudName.textContent = '대기 중';
-      return;
-    }
-    if (phase === 'FINAL') {
-      elHudTurn.textContent = players.length + '/' + players.length;
-      elHudName.textContent = '최종 결과';
-      return;
-    }
-    elHudTurn.textContent = (turnIdx + 1) + '/' + players.length;
-    elHudName.textContent = players[turnIdx] ? players[turnIdx].name : '–';
+    elHudTurn.textContent = phase === 'SETUP' ? '도전 대기' : (phase === 'RESULT' ? '기록 완료' : '측정 중');
   }
 
   /* ── 커튼 ── */
@@ -320,7 +268,7 @@
     if (t < blindAt) {
       setAngle(angleOf(t));
       setBig(fmt(t));
-      setSeg(segAt(t).short + ' 구간');
+      setSeg('시간에 집중하세요');
       pushLive(Math.floor(t / 1000) + '초대');
     } else {
       // 가려진 뒤에도 로터는 계속 돈다(커튼 뒤). DOM 의 숫자는 실제로 지운다.
@@ -350,7 +298,7 @@
     SNM.mascot.setExpression(elReady, 'default');
     renderHUD();
     renderBoard();
-    setHint('<b>' + escapeHTML(players[turnIdx].name) + '</b> 님 차례입니다. 준비되면 시작하세요.');
+    setHint('준비되면 시작하세요.');
     elReadyBtn.focus();
   }
 
@@ -369,6 +317,19 @@
       : Math.round(U.rand(BLIND_MIN, BLIND_MAX));
 
     cdHandle = SNM.ui.countdown(elStage, beginRun);
+  }
+
+  function startChallenge() {
+    phase = 'READY';
+    resetCurtain();
+    elSetup.hidden = true;
+    elReady.hidden = true;
+    elPlate.classList.remove('is-half', 'is-blind', 'is-hit', 'is-spinning');
+    setBig('00.00'); setSeg('출발선'); setAngle(0);
+    elStopBtn.disabled = true; elStopBtn.textContent = '정 지';
+    renderHUD();
+    setHint('카운트다운 후 시작합니다. 9.19초의 감각을 준비하세요!');
+    startTurn();
   }
 
   function beginRun() {
@@ -436,7 +397,7 @@
       if (settled) return;
       settled = true;
       setBig(fmt(ms));
-      setSeg(segAt(ms).short + ' 구간');
+      setSeg('기록이 완료됐습니다');
       U.after(180, function () { finishTurn(timedOut); });
     }
     // ★ 연출이 결과를 막아서는 안 된다 — rAF 가 멈춰도 결과는 반드시 나온다
@@ -456,6 +417,7 @@
 
   function finishTurn(timedOut) {
     phase = 'RESULT';
+    renderHUD();
 
     var p    = players[turnIdx];
     var hits = timedOut ? [] : evalMissions(stopMs);
@@ -485,9 +447,6 @@
     else if (err <= 100)  { SNM.audio.sfx.good(); SNM.ui.confetti(16); }
     else                  { SNM.audio.sfx.tick(); }
 
-    SNM.mascot.setExpression(elPlateMascot, hits.length ? 'happy' : (err <= 300 ? 'happy' : 'default'));
-
-    var seg   = segAt(stopMs);
     var sign  = (stopMs >= TARGET_MS) ? '+' : '-';
     var title = timedOut ? '⏰ 시간 초과'
               : exact ? '🏆 9.19 완벽 적중!'
@@ -507,33 +466,26 @@
               '</div>';
     });
 
-    var isLast = (turnIdx >= players.length - 1);
     var buttons = [{
-      label: isLast ? '최종 결과 보기' : '다음 참가자 (' + (turnIdx + 2) + '/' + players.length + ')',
+      label: '바로 다시 도전',
       variant: 'primary',
-      // modal 은 onClick 직후 close() 하므로, 새 모달을 열 때는 다음 틱으로 미룬다
-      onClick: function () {
-        U.after(40, isLast ? function () { showFinal(true); } : nextTurn);
-      }
-    }, {
-      label: '이 차례 다시 측정',
-      variant: 'ghost',
       onClick: function () { U.after(40, retryTurn); }
+    }, {
+      label: '시작 화면으로',
+      variant: 'ghost',
+      onClick: function () { U.after(40, backToSetup); }
     }];
 
-    setHint(seg.desc);
+    setHint('목표 시간과의 오차를 확인하고 다시 도전해보세요.');
 
     SNM.ui.modal({
       title: title,
-      mascot: hits.length ? 'happy' : (timedOut ? 'sad' : (err <= 300 ? 'happy' : 'default')),
-      grade: escapeHTML(p.name),
+      mascot: null,
       headline: '<span class="' + (hits.length ? 'modal__headline--hit' : '') + '">' +
                 fmt(stopMs) + '</span><small>초</small>',
       rows: [
         ['기록',       fmt3(stopMs) + '초'],
-        ['목표',       '9.190초'],
-        ['오차',       sign + U.fmtNum(Math.round(err)) + 'ms'],
-        ['멈춘 명소',  seg.name]
+        ['목표와 오차', sign + (err / 1000).toFixed(3) + '초']
       ],
       html: html,
       size: hits.length ? 'lg' : null,
@@ -545,22 +497,12 @@
   function nextTurn() {
     turnIdx += 1;
     if (turnIdx >= players.length) { showFinal(true); return; }
-    showReady();
+    startChallenge();
   }
 
   function retryTurn() {
-    var p = players[turnIdx];
-    p.done = false; p.ms = null; p.err = null; p.missions = [];
-    // 이 참가자만 지웠으므로, 그가 최초 공개자였던 미션은 공개 상태를 되돌린다
-    Object.keys(revealed).forEach(function (id) {
-      var stillHit = players.some(function (q) {
-        return q.done && (q.missions || []).indexOf(id) >= 0;
-      });
-      if (!stillHit) delete revealed[id];
-    });
-    if (!Object.keys(revealed).length) elMissionBoard.hidden = true;
-    renderMissions(false);
-    showReady();
+    /* 직전 기록과 공개 미션은 새 결과가 나올 때까지 보존한다. */
+    startChallenge();
   }
 
   /* ───────────────────── 무효 처리 ───────────────────── */
@@ -576,14 +518,14 @@
     elPlate.classList.remove('is-spinning', 'is-half', 'is-blind');
     setBig('--.--');
     setSeg('무효');
-    setHint('계측 중 화면을 벗어나 이번 차례가 무효 처리되었습니다.');
+    setHint('화면이 전환되어 이번 도전은 무효예요.');
 
     SNM.ui.modal({
       title: '⚠️ 무효 처리',
-      mascot: 'sad',
-      note: '계측 중 다른 화면으로 이동해 시간이 어긋났습니다. 이 차례를 다시 진행해 주세요.',
+      mascot: null,
+      note: '화면이 전환되어 이번 도전은 무효예요.',
       dismissible: false,
-      buttons: [{ label: '이 차례 다시 진행', variant: 'primary',
+      buttons: [{ label: '다시 도전', variant: 'primary',
                   onClick: function () { U.after(40, retryTurn); } }]
     });
   }
@@ -615,7 +557,6 @@
     renderHUD();
     renderMissions(true, true);
     renderBoard();
-    elResetBtn.hidden = false;
     // 진행자가 결과를 닫았다가 다시 띄울 수 있도록 정지 버튼을 재활용한다
     elStopBtn.disabled = false;
     elStopBtn.textContent = '최종 결과 다시 보기';
@@ -640,7 +581,7 @@
       html += '<div class="board__row is-done">' +
                 '<span class="board__rank board__rank--medal">' + (medal[p.rank - 1] || p.rank) + '</span>' +
                 '<span class="board__who">' +
-                  '<span class="board__name">' + escapeHTML(p.name) + '</span>' +
+                  '<span class="board__name">기록</span>' +
                   (tags ? '<span class="board__tags">' + tags + '</span>' : '') +
                 '</span>' +
                 '<span class="board__score">' +
@@ -659,9 +600,7 @@
 
     var winners = list.filter(function (p) { return p.rank === 1; });
     var gradeTxt = winners.length
-      ? (winners.length > 1 ? '공동 1위 · ' : '') +
-        winners.map(function (p) { return escapeHTML(p.name); }).join(', ') +
-        ' 님이 9.19초에 가장 근접!'
+      ? '9.19초에 가장 근접한 기록 ' + fmt(winners[0].ms) + '초!'
       : null;
 
     SNM.store.saveLast(players);
@@ -683,7 +622,22 @@
 
   /* ───────────────────── 현황판 / 미션 보드 ───────────────────── */
 
+  /** 지울 것이 남아 있는지 — 기록 한 건이라도 있거나 공개된 미션이 있으면 참 */
+  function hasRecords() {
+    if (Object.keys(revealed).length) return true;
+    for (var i = 0; i < players.length; i++) if (players[i].done) return true;
+    return false;
+  }
+
+  /** 초기화 버튼은 지울 것이 있을 때만 노출한다 */
+  function paintResetBtn() { elResetBtn.hidden = !hasRecords(); }
+
   function renderBoard() {
+    paintResetBtn();
+    if (!players.length || !players[0].done) {
+      elBoardList.innerHTML = '<li class="board__empty">아직 기록이 없습니다</li>';
+      return;
+    }
     var html = '';
     players.forEach(function (p, i) {
       var cls = p.done ? 'is-done' : (i === turnIdx && phase !== 'SETUP' && phase !== 'FINAL' ? 'is-current' : '');
@@ -695,9 +649,11 @@
       if (p.timedOut) tags += ' <span class="chip">시간 초과</span>';
 
       html += '<li class="board__row ' + cls + '">' +
-                '<span class="board__rank">' + (i + 1) + '</span>' +
+                '<span class="board__rank">⏱</span>' +
                 '<span class="board__who">' +
-                  '<span class="board__name">' + escapeHTML(p.name) + '</span>' +
+                  '<span class="board__name">' +
+                    (p.done ? '기록 완료' : (i === turnIdx && phase !== 'SETUP' ? '도전 중' : '대기 중')) +
+                  '</span>' +
                   (tags ? '<span class="board__tags">' + tags + '</span>' : '') +
                 '</span>' +
                 '<span class="board__score">' +
@@ -705,8 +661,8 @@
                     ? '<span class="board__time">' + fmt(p.ms) + '</span>' +
                       '<span class="board__err">' + (p.ms >= TARGET_MS ? '+' : '-') +
                         U.fmtNum(Math.round(p.err)) + 'ms</span>'
-                    : '<span class="board__time board__time--wait">--.--</span>' +
-                      '<span class="board__err">' + (i === turnIdx ? '진행 중' : '대기') + '</span>') +
+                    /* 상태는 왼쪽 라벨에서 이미 말하므로 여기서 반복하지 않는다 */
+                    : '<span class="board__time board__time--wait">--.--</span>') +
                 '</span>' +
               '</li>';
     });
@@ -726,7 +682,7 @@
       html += '<li class="mission ' + state + '">' +
                 '<span class="mission__code">' + (by || openAll ? m.icon + ' ' + m.code : '❓ ?.??') + '</span>' +
                 '<span class="mission__title">' + (by || openAll ? m.title : '히든 미션') + '</span>' +
-                (by ? '<span class="mission__by">' + escapeHTML(by) + ' 적중!</span>' : '') +
+                (by ? '<span class="mission__by">적중!</span>' : '') +
               '</li>';
     });
     elMissionList.innerHTML = html;
@@ -804,20 +760,13 @@
   /* ───────────────────── 세션 시작 / 초기화 ───────────────────── */
 
   function startSession() {
-    var names = readNames();
-    SNM.store.setSetting('names', names);
-
-    players = names.map(function (n) {
-      return { name: n, ms: null, err: null, missions: [], done: false, timedOut: false, voided: false };
-    });
+    players = [{ name:'도전자', ms:null, err:null, missions:[], done:false, timedOut:false, voided:false }];
     turnIdx  = 0;
-    revealed = {};
-    elMissionBoard.hidden = true;
-    elResetBtn.hidden = false;
-    renderMissions(false);
+    /* revealed 는 비우지 않는다 — 미션 공개 현황은 회차를 넘겨 누적된다 */
+    renderMissions(Object.keys(revealed).length > 0);
     renderBoard();
     SNM.audio.sfx.tap();
-    showReady();
+    startChallenge();
   }
 
   function restartSameRoster() {
@@ -832,6 +781,10 @@
     showReady();
   }
 
+  /**
+   * 시작 화면으로 되돌린다. 무대(스톱워치·커튼·버튼)만 초기 상태로 돌리고
+   * 직전 기록과 공개된 미션은 그대로 남긴다 — 지우는 일은 clearRecords() 담당.
+   */
   function backToSetup() {
     phase = 'SETUP';
     if (gameLoop) { gameLoop.stop(); gameLoop = null; }
@@ -839,22 +792,29 @@
     resetCurtain();
     elReady.hidden = true;
     elSetup.hidden = false;
-    elResetBtn.hidden = true;
-    elMissionBoard.hidden = true;
     elStopBtn.disabled = true;
     elStopBtn.textContent = '정 지';
     elPlate.classList.remove('is-half', 'is-blind', 'is-hit', 'is-spinning');
     setBig('00.00');
     setSeg('대기 중');
     setAngle(0);
-    renderNameInputs(players.length ? players.map(function (p) { return p.name; })
-                                    : SNM.store.getSetting('names'));
-    players = [];
-    turnIdx = 0;
-    revealed = {};
+    renderMissions(Object.keys(revealed).length > 0);
     renderBoard();
     renderHUD();
-    setHint('참가자 이름을 확인하고 <b>[게임 시작]</b>을 누르세요.');
+    setHint(hasRecords()
+      ? '직전 기록이 남아 있습니다. <b>[도전 시작]</b>으로 이어서 진행하세요.'
+      : '<b>[도전 시작]</b>을 누르면 바로 카운트다운이 시작됩니다.');
+  }
+
+  /** 기록·공개 미션을 모두 지우고 시작 화면으로 — 초기화 버튼 전용 */
+  function clearRecords() {
+    players  = [];
+    turnIdx  = 0;
+    revealed = {};
+    elMissionBoard.hidden = true;
+    renderMissions(false);
+    backToSetup();
+    SNM.ui.toast('기록을 초기화했습니다');
   }
 
   /* ───────────────────────── 입력 ───────────────────────── */
@@ -891,11 +851,12 @@
       startTurn();
     });
     elResetBtn.addEventListener('click', function () {
+      SNM.audio.sfx.tap();
       SNM.ui.confirm({
-        title: '처음부터 진행할까요?',
-        message: '현재 기록과 공개된 미션이 모두 초기화됩니다.',
-        yes: '초기화', danger: true
-      }, backToSetup);
+        title: '기록을 초기화할까요?',
+        message: '현재 기록과 공개된 히든 미션이 모두 지워집니다. 되돌릴 수 없어요.',
+        yes: '초기화', no: '취소', danger: true
+      }, clearRecords);
     });
 
     document.addEventListener('keydown', function (e) {
@@ -984,7 +945,7 @@
 
   function init() {
     if (!U.$('#stage')) return;      // 규칙 검증 페이지(test.html) 등에서는 UI 를 붙이지 않는다
-    SNM.ui.mountHeader('성남 9.19 룰렛');
+    SNM.ui.mountHeader('청년의 날 9.19 타이밍 챌린지');
 
     elStage        = U.$('#stage');
     elRotor        = U.$('#wheelRotor');
@@ -994,7 +955,6 @@
     elPlateMascot  = U.$('#plateMascot');
     elCurtain      = U.$('#curtain');
     elHudTurn      = U.$('#hudTurn');
-    elHudName      = U.$('#hudName');
     elHint         = U.$('#hint');
     elLive         = U.$('#live');
     elSetup        = U.$('#setupOverlay');
@@ -1015,15 +975,7 @@
     elMissionCount = U.$('#missionCount');
 
     elRotor.innerHTML = buildWheelSVG();
-    SNM.mascot.mount(elPlateMascot, 'default', 34, { idle: false });
-    SNM.mascot.mount(U.$('#setupMascot'), 'happy', 92, { idle: true, label: '성나미' });
-    SNM.mascot.mount(U.$('#readyMascot'), 'surprised', 104, { idle: true, label: '성나미' });
-    SNM.mascot.mount(U.$('#curtainMascot'), 'surprised', 74, { idle: false });
-
-    var s = SNM.store.getSettings();
-    blindMode = (s.blindMode === 'fixed') ? 'fixed' : 'random';
-    paintBlindMode();
-    renderNameInputs(Array.isArray(s.names) && s.names.length ? s.names : ['참가자 1', '참가자 2', '참가자 3']);
+    blindMode = 'random';
     renderMissions(false);
     renderBoard();
     renderHUD();

@@ -112,7 +112,7 @@ SNM.ui = (function () {
   function confirm(opts, onYes) {
     return modal({
       title: opts.title || '확인',
-      mascot: opts.mascot || 'surprised',
+      mascot: Object.prototype.hasOwnProperty.call(opts, 'mascot') ? opts.mascot : 'surprised',
       note: opts.message,
       dismissible: true,
       buttons: [
@@ -175,7 +175,7 @@ SNM.ui = (function () {
     if (U.reduceMotion()) return;
     n = n || 24;
     var wrap = U.el('div', 'confetti-wrap');
-    var colors = ['#F6AB00', '#FFD466', '#005BAC', '#4D96D6', '#DF003C', '#FF5C82'];
+    var colors = ['#FF97B0', '#FFC94B', '#7FDCC2', '#8FCBF2', '#B6A8F0', '#FFB392'];
     for (var i = 0; i < n; i++) {
       var c = U.el('i', 'confetti');
       c.style.left = U.rand(0, 100).toFixed(1) + '%';
@@ -213,8 +213,8 @@ SNM.ui = (function () {
     return '' +
       '<header class="app-header"><div class="container app-header__inner">' +
         '<span class="app-header__brand">' +
-          '<img src="./assets/seongnam-ci.svg" alt="성남시 CI" width="36" height="33">' +
-          '<span>' + (title || '성남 9.19 룰렛') + '</span>' +
+          '<img class="app-header__ci" src="./assets/seongnam-ci.svg" alt="성남시">' +
+          '<span>' + (title || '청년의 날 9.19 타이밍 챌린지') + '</span>' +
         '</span>' +
         '<div class="app-header__spacer"></div>' +
         '<div class="app-header__actions">' +
